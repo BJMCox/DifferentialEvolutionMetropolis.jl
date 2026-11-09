@@ -168,6 +168,9 @@ struct DifferentialEvolutionCompositeSamplerRandom{
         if any(update_weights .< 0)
             error("Update weights must be non-negative")
         end
+        if all(iszero, update_weights)
+            error("At least one update weight must be positive")
+        end
         return new{T, S}(updates, update_weights)
     end
 end

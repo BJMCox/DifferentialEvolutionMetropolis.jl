@@ -42,6 +42,19 @@ struct FallbackSampler <: DifferentialEvolutionMetropolis.AbstractDifferentialEv
             setup_snooker_update();
             w = [-0.1, 0.5]  # Negative weights
         )
+
+        for w in ([0.0, 0.0], [-0.0, 0.0])
+            @test_throws ErrorException setup_sampler_scheme(
+                setup_de_update(), setup_snooker_update(); w = w
+            )
+        end
+
+        samples = sample(
+            backwards_compat_rng(42), AbstractMCMC.LogDensityModel(IsotropicNormalModel(zeros(2))),
+            setup_sampler_scheme(setup_de_update(), setup_snooker_update(); w = [0.0, 1.0]), 2;
+            n_chains = 4, memory = false, silent = true, progress = false
+        )
+        @test all(draw -> all(isfinite, draw.ld), samples)
     end
 
     @testset "Chains required" begin
